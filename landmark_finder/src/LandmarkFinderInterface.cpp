@@ -23,7 +23,22 @@ LandmarkFinderInterface::LandmarkFinderInterface(ros::NodeHandle nh_public,
 
 void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg) {
 
-    cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
+    cv_bridge::CvImagePtr cvPtr;
+    if (msg->encoding == "8UC1")
+    {
+        sensor_msgs::Image img;
+        img.header = msg->header;
+        img.height = msg->height;
+        img.width = msg->width;
+        img.is_bigendian = msg->is_bigendian;
+        img.step = msg->step;
+        img.data = msg->data;
+        img.encoding = "mono8";
+        cvPtr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8);
+    }else
+    {
+        cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
+    }
 
     std::vector<stargazer::ImgLandmark> detected_img_landmarks;
     landmarkFinder->DetectLandmarks(cvPtr->image, detected_img_landmarks);
