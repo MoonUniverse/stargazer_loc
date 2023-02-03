@@ -56,9 +56,9 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
     cv::bitwise_not(landmarkFinder->grayImage_, landmarkFinder->grayImage_);
     cv::bitwise_not(landmarkFinder->filteredImage_, landmarkFinder->filteredImage_);
 
-    // Show images
-    debugVisualizer_.ShowImage(landmarkFinder->grayImage_, "Gray Image");
-    debugVisualizer_.ShowImage(landmarkFinder->filteredImage_, "Filtered Image");
+    // // Show images
+    // debugVisualizer_.ShowImage(landmarkFinder->grayImage_, "Gray Image");
+    // debugVisualizer_.ShowImage(landmarkFinder->filteredImage_, "Filtered Image");
 
     // Show detections
     auto point_img = debugVisualizer_.ShowPoints(landmarkFinder->filteredImage_,

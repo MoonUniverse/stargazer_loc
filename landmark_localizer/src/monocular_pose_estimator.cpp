@@ -84,7 +84,26 @@ void MPENode::landmarkCallback(const landmark_localizer::LandmarkArray::ConstPtr
   double time_to_predict = landmark_msg->header.stamp.toSec();
 
   std::vector<ImgLandmark> detected_img_landmarks;
-
+  for(auto& lm : landmark_msg->landmarks)
+  {
+    ImgLandmark detected_landmark;
+    detected_landmark.nID = lm.id;
+    for(auto& pt : lm.corner_points)
+    {
+      cv::Point CurrentvoCorners;
+      CurrentvoCorners.x = pt.u;
+      CurrentvoCorners.y = pt.v;
+      detected_landmark.voCorners.push_back(CurrentvoCorners);
+    }
+    for(auto& pt : lm.id_points)
+    {
+      cv::Point CurrentvoIDPoints;
+      CurrentvoIDPoints.x = pt.u;
+      CurrentvoIDPoints.y = pt.v;
+      detected_landmark.voIDPoints.push_back(CurrentvoIDPoints);
+    }
+    detected_img_landmarks.push_back(detected_landmark);
+  }
 
   const bool found_body_pose = trackable_object_.estimateBodyPose(detected_img_landmarks,time_to_predict);
   if (found_body_pose) // Only output the pose, if the pose was updated (i.e. a valid pose was found).

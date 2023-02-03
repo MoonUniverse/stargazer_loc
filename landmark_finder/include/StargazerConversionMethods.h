@@ -104,7 +104,6 @@ inline landmark_finder::LandmarkArray convert2LandmarkMsg(const std::vector<star
 
         landmarksMessage.landmarks.push_back(landmark);
     }
-
     return landmarksMessage;
 }
 

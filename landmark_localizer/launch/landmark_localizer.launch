@@ -1,0 +1,10 @@
+<launch> 
+
+
+	<node name="landmark_localizer" pkg="landmark_localizer" type="landmark_localizer_node" respawn="true"> 
+        <param name="landmark_info_topic" value="/stellar/ir/image_raw"/>
+        <param name="camera_info_topic" value="/stellar/ir/camera_info"/>
+	</node>
+	
+
+</launch>
