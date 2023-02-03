@@ -18,8 +18,8 @@ MPENode::MPENode(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
   : nh_(nh), nh_private_(nh_private), have_camera_info_(false)
 {
 
-  nh_.param("landmark_info_topic", landmark_info_topic_, std::string("123"));
-  nh_.param("camera_info_topic", camera_info_topic_, std::string("123"));
+  nh_private_.param("landmark_info_topic", landmark_info_topic_, std::string("/landmark_info_topic"));
+  nh_private_.param("camera_info_topic", camera_info_topic_, std::string("/camera_info_topic"));
 
   landmark_info_sub_ = nh_.subscribe(landmark_info_topic_, 1,
                                    &MPENode::landmarkCallback, this);
@@ -78,6 +78,10 @@ void MPENode::landmarkCallback(const landmark_localizer::LandmarkArray::ConstPtr
   if (!have_camera_info_)
   {
     ROS_WARN("No camera info yet...");
+    return;
+  }
+  if(landmark_msg->landmarks.size() ==0)
+  {
     return;
   }
   // makers in the image

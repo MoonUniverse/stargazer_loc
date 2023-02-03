@@ -60,11 +60,11 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
     // debugVisualizer_.ShowImage(landmarkFinder->grayImage_, "Gray Image");
     // debugVisualizer_.ShowImage(landmarkFinder->filteredImage_, "Filtered Image");
 
-    // Show detections
-    auto point_img = debugVisualizer_.ShowPoints(landmarkFinder->filteredImage_,
-                                                 landmarkFinder->clusteredPixels_);
-    auto cluster_img = debugVisualizer_.ShowClusters(landmarkFinder->filteredImage_,
-                                                     landmarkFinder->clusteredPoints_);
+    // // Show detections
+    // auto point_img = debugVisualizer_.ShowPoints(landmarkFinder->filteredImage_,
+    //                                              landmarkFinder->clusteredPixels_);
+    // auto cluster_img = debugVisualizer_.ShowClusters(landmarkFinder->filteredImage_,
+    //                                                  landmarkFinder->clusteredPoints_);
 
     // Show landmarks
     cv::Mat temp;

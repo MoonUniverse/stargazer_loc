@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[])
 {
-  ros::init(argc, argv, "landmark_localizer");
+  ros::init(argc, argv, "landmark_localizer_node");
 
   monocular_pose_estimator::MPENode mpe_node;
 
