@@ -40,7 +40,6 @@ void LandmarkFinderInterface::camerainfoCallback(const sensor_msgs::CameraInfo::
     camera_matrix_K_.at<double>(2, 1) = cam_info_.K[7];
     camera_matrix_K_.at<double>(2, 2) = cam_info_.K[8];
     camera_distortion_coeffs_ = cam_info_.D;
-
     have_camera_info_ = true;
     ROS_INFO("Camera calibration information obtained.");
   }
@@ -97,7 +96,13 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
     debugVisualizer_.DrawLandmarks(temp, detected_img_landmarks);
     debugVisualizer_.ShowImage(temp, "Detected Landmarks");
 
+    if(!have_camera_info_){
+      return;
+    }
 
+    if(detected_img_landmarks.size() == 0) {
+      return;
+    }
     // cal pose
     stargazer::ImgLandmark minId_landmarks;
     if (detected_img_landmarks.size() == 1) {
@@ -113,8 +118,8 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       }
     }
 
-    std::vector<cv::Point2f> landmark_point_array;
-    cv::Point2f landmark_point;
+    std::vector<cv::Point2d> landmark_point_array;
+    cv::Point2d landmark_point;
     for (int i = 0; i < 3; i++) {
       landmark_point.x = minId_landmarks.voCorners[i].x;
       landmark_point.y = minId_landmarks.voCorners[i].y;
@@ -136,7 +141,12 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       world_point.push_back(temp_point);
     }
     cv::Mat raux, taux;
-    cv::solvePnP(landmark_point_array, world_point, camera_matrix_K_, camera_distortion_coeffs_, raux, taux, false, CV_RELATIVE);
+    std::cout << "landmark_point_array: " << landmark_point_array << std::endl;
+    std::cout << "world_point: " << world_point << std::endl;
+    std::cout << "camera_matrix_K_: " << camera_matrix_K_ << std::endl;
+    // std::cout << "camera_distortion_coeffs_: " << camera_distortion_coeffs_ << std::endl;
+
+    cv::solvePnP(landmark_point_array, world_point, camera_matrix_K_, camera_distortion_coeffs_, raux, taux);
     std::cout << "raux: " << raux << std::endl;
     std::cout << "taux: " << taux << std::endl;
 }

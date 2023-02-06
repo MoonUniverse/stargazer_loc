@@ -2,6 +2,7 @@
 
     <arg name="stargazer_config" default="$(find landmark_finder)/res/stargazer.yaml"/>
     <arg name="undistorted_image_topic" default="/stellar/ir/image_raw"/>
+    <arg name="camera_info_topic" default="/stellar/ir/camera_info"/>
     <arg name="landmark_topic" default="/landmarks_seen"/>
     <arg name="debug_mode" default="true"/>
 
@@ -9,6 +10,7 @@
         <param name="stargazer_config" value="$(arg stargazer_config)"/>
         <param name="landmark_topic" value="$(arg landmark_topic)"/>
         <param name="undistorted_image_topic" value="$(arg undistorted_image_topic)"/>
+        <param name="camera_info_topic" value="$(arg camera_info_topic)"/>
 
         <param name="threshold" value="100"/>
         <param name="tight_filter_size" value="3"/>

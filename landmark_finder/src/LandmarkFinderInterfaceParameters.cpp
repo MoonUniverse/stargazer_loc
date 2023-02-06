@@ -9,6 +9,7 @@ void LandmarkFinderInterfaceParameters::fromNodeHandle(const ros::NodeHandle& nh
     getParam(nh, "stargazer_config", stargazer_config);
     getParam(nh, "landmark_topic", landmark_topic);
     getParam(nh, "undistorted_image_topic", undistorted_image_topic);
+    getParam(nh, "camera_info_topic", camera_info_topic);
 
     getParam(nh, "threshold", cfg.threshold);
     getParam(nh, "tight_filter_size", cfg.tight_filter_size);
