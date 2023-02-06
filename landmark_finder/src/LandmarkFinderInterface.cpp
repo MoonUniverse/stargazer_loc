@@ -7,7 +7,7 @@ using namespace stargazer_ros_tool;
 
 LandmarkFinderInterface::LandmarkFinderInterface(ros::NodeHandle nh_public,
                                                  ros::NodeHandle nh_private)
-        : img_trans{nh_public}, server{nh_private} {
+        : img_trans{nh_public}, server{nh_private},have_camera_info_(false) {
 
     params_.fromNodeHandle(nh_private);
     landmarkFinder = std::make_unique<stargazer::LandmarkFinder>(params_.stargazer_config);
@@ -15,10 +15,35 @@ LandmarkFinderInterface::LandmarkFinderInterface(ros::NodeHandle nh_public,
     lm_pub = nh_private.advertise<landmark_finder::LandmarkArray>(params_.landmark_topic, 1);
     img_sub = img_trans.subscribe(
         params_.undistorted_image_topic, 1, &LandmarkFinderInterface::imgCallback, this);
+    camera_info_sub = nh_private.subscribe(
+        params_.camera_info_topic, 1, &LandmarkFinderInterface::camerainfoCallback, this);    
     debugVisualizer_.SetWaitTime(10);
 
     if (params_.cfg.debug_mode)
         showNodeInfo();
+}
+
+void LandmarkFinderInterface::camerainfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg) {
+  if (!have_camera_info_)
+  {
+    cam_info_ = *msg;
+
+    // Calibrated camera
+    camera_matrix_K_ = cv::Mat(3, 3, CV_64F);
+    camera_matrix_K_.at<double>(0, 0) = cam_info_.K[0];
+    camera_matrix_K_.at<double>(0, 1) = cam_info_.K[1];
+    camera_matrix_K_.at<double>(0, 2) = cam_info_.K[2];
+    camera_matrix_K_.at<double>(1, 0) = cam_info_.K[3];
+    camera_matrix_K_.at<double>(1, 1) = cam_info_.K[4];
+    camera_matrix_K_.at<double>(1, 2) = cam_info_.K[5];
+    camera_matrix_K_.at<double>(2, 0) = cam_info_.K[6];
+    camera_matrix_K_.at<double>(2, 1) = cam_info_.K[7];
+    camera_matrix_K_.at<double>(2, 2) = cam_info_.K[8];
+    camera_distortion_coeffs_ = cam_info_.D;
+
+    have_camera_info_ = true;
+    ROS_INFO("Camera calibration information obtained.");
+  }
 }
 
 void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg) {
@@ -71,6 +96,49 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
     cvtColor(landmarkFinder->grayImage_, temp, CV_GRAY2BGR);
     debugVisualizer_.DrawLandmarks(temp, detected_img_landmarks);
     debugVisualizer_.ShowImage(temp, "Detected Landmarks");
+
+
+    // cal pose
+    stargazer::ImgLandmark minId_landmarks;
+    if (detected_img_landmarks.size() == 1) {
+      minId_landmarks = detected_img_landmarks[0];
+    } else {
+      unsigned int min_nID = detected_img_landmarks[0].nID;
+      minId_landmarks = detected_img_landmarks[0];
+      for (int i = 1; i < detected_img_landmarks.size(); i++) {
+        if (min_nID > detected_img_landmarks[i].nID) {
+          min_nID = detected_img_landmarks[i].nID;
+          minId_landmarks = detected_img_landmarks[i];
+        }
+      }
+    }
+
+    std::vector<cv::Point2f> landmark_point_array;
+    cv::Point2f landmark_point;
+    for (int i = 0; i < 3; i++) {
+      landmark_point.x = minId_landmarks.voCorners[i].x;
+      landmark_point.y = minId_landmarks.voCorners[i].y;
+      landmark_point_array.push_back(landmark_point);
+    }
+    for (int i = 0; i < minId_landmarks.voIDPoints.size(); i++) {
+      landmark_point.x = minId_landmarks.voIDPoints[i].x;
+      landmark_point.y = minId_landmarks.voIDPoints[i].y;
+      landmark_point_array.push_back(landmark_point);
+    }
+    std::vector<stargazer::Point> world_point_array;
+    std::vector<cv::Point3f> world_point;
+    world_point_array = stargazer::getLandmarkPoints(minId_landmarks.nID);
+    for (int i = 0; i < world_point_array.size(); i++) {
+      cv::Point3f temp_point;
+      temp_point.x = world_point_array[i][0];
+      temp_point.y = world_point_array[i][1];
+      temp_point.z = 0;
+      world_point.push_back(temp_point);
+    }
+    cv::Mat raux, taux;
+    cv::solvePnP(landmark_point_array, world_point, camera_matrix_K_, camera_distortion_coeffs_, raux, taux, false, CV_RELATIVE);
+    std::cout << "raux: " << raux << std::endl;
+    std::cout << "taux: " << taux << std::endl;
 }
 
 void LandmarkFinderInterface::reconfigureCallback(LandmarkFinderConfig& config,
