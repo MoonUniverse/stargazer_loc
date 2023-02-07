@@ -10,7 +10,11 @@
 #include <landmark_finder/LandmarkFinderConfig.h>
 #include <sensor_msgs/CameraInfo.h>
 #include "LandmarkFinderInterfaceParameters.h"
-
+#include <Eigen/Dense>
+#include <opencv2/core/eigen.hpp>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_datatypes.h>
+#include <tf/tf.h>
 namespace stargazer_ros_tool {
 
 class LandmarkFinderInterface {
@@ -35,7 +39,9 @@ private:
     bool have_camera_info_;
 
     cv::Mat camera_matrix_K_;
-    std::vector<double> camera_distortion_coeffs_;
+    cv::Mat camera_distortion_coeffs_;
     sensor_msgs::CameraInfo cam_info_; //!< Variable to store the camera calibration parameters
+
+    tf::TransformBroadcaster broadcaster;
 };
 }

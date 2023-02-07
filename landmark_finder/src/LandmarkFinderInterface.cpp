@@ -39,7 +39,8 @@ void LandmarkFinderInterface::camerainfoCallback(const sensor_msgs::CameraInfo::
     camera_matrix_K_.at<double>(2, 0) = cam_info_.K[6];
     camera_matrix_K_.at<double>(2, 1) = cam_info_.K[7];
     camera_matrix_K_.at<double>(2, 2) = cam_info_.K[8];
-    camera_distortion_coeffs_ = cam_info_.D;
+    camera_distortion_coeffs_ = (cv::Mat_<double>(5, 1) << cam_info_.D[0],cam_info_.D[1],
+                                                              cam_info_.D[2],cam_info_.D[3],cam_info_.D[5]);
     have_camera_info_ = true;
     ROS_INFO("Camera calibration information obtained.");
   }
@@ -118,8 +119,8 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       }
     }
 
-    std::vector<cv::Point2d> landmark_point_array;
-    cv::Point2d landmark_point;
+    std::vector<cv::Point2f> landmark_point_array;
+    cv::Point2f landmark_point;
     for (int i = 0; i < 3; i++) {
       landmark_point.x = minId_landmarks.voCorners[i].x;
       landmark_point.y = minId_landmarks.voCorners[i].y;
@@ -131,24 +132,45 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       landmark_point_array.push_back(landmark_point);
     }
     std::vector<stargazer::Point> world_point_array;
-    std::vector<cv::Point3f> world_point;
+    std::vector<cv::Point3d> world_point;
     world_point_array = stargazer::getLandmarkPoints(minId_landmarks.nID);
     for (int i = 0; i < world_point_array.size(); i++) {
-      cv::Point3f temp_point;
+      cv::Point3d temp_point;
       temp_point.x = world_point_array[i][0];
       temp_point.y = world_point_array[i][1];
       temp_point.z = 0;
       world_point.push_back(temp_point);
     }
     cv::Mat raux, taux;
-    std::cout << "landmark_point_array: " << landmark_point_array << std::endl;
-    std::cout << "world_point: " << world_point << std::endl;
-    std::cout << "camera_matrix_K_: " << camera_matrix_K_ << std::endl;
-    // std::cout << "camera_distortion_coeffs_: " << camera_distortion_coeffs_ << std::endl;
+    cv::Mat Rvec;
+    cv::Mat_<float> Tvec;
+    cv::solvePnP(world_point, landmark_point_array, camera_matrix_K_, camera_distortion_coeffs_, raux, taux ,false, cv::SOLVEPNP_ITERATIVE);
 
-    cv::solvePnP(landmark_point_array, world_point, camera_matrix_K_, camera_distortion_coeffs_, raux, taux);
-    std::cout << "raux: " << raux << std::endl;
-    std::cout << "taux: " << taux << std::endl;
+
+    raux.convertTo(Rvec, CV_32F);    
+    taux.convertTo(Tvec, CV_32F);   
+
+    cv::Mat_<float> rotMat(3, 3);
+    cv::Rodrigues(Rvec, rotMat);  //由于solvePnP返回的是旋转向量，故用罗德里格斯变换变成旋转矩阵
+
+
+    //格式转换
+    Eigen::Matrix3d R_n;
+    Eigen::Matrix3d T_n;
+    cv::cv2eigen(rotMat, R_n);
+    cv::cv2eigen(Tvec, T_n);
+
+    Eigen::Quaterniond eigen_quat(R_n);
+    // tf::Quaternion tf_quat;
+    // tf::quaternionEigenToTF(eigen_quat, tf_quat);
+    
+    // std::cout << "R_n" << R_n << std::endl;
+    // std::cout << "T_n" << T_n << std::endl;
+    broadcaster.sendTransform(tf::StampedTransform(
+        tf::Transform(tf::Quaternion(eigen_quat.x(), eigen_quat.y(), eigen_quat.z(), eigen_quat.w()),
+                      tf::Vector3(T_n(0), T_n(1), T_n(2))),
+        ros::Time::now(), "ir_camera_link", "landmark_link"));
+
 }
 
 void LandmarkFinderInterface::reconfigureCallback(LandmarkFinderConfig& config,
