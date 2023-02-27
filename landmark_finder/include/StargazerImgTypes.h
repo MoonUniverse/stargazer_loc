@@ -16,7 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
+#ifndef STARGZAERTYPES_H_
+#define STARGZAERTYPES_H_
 
 #include <vector>
 #include "StargazerTypes.h"
@@ -28,7 +29,7 @@ namespace stargazer {
  * @brief A cluster is an unordered collection of points, it represents a hypothesis for a landmark.
  *
  */
-typedef std::vector<cv::Point> Cluster;
+typedef std::vector<cv::Point2f> Cluster;
 
 /**
  * @brief An image landmark holds the information of a observed landmark. All coordinates are in image coordinates.
@@ -36,8 +37,8 @@ typedef std::vector<cv::Point> Cluster;
  */
 struct ImgLandmark {
     uint16_t nID;                      /**< TODO: describe */
-    std::vector<cv::Point> voCorners;  /**< TODO: describe */
-    std::vector<cv::Point> voIDPoints; /**< TODO: describe */
+    std::vector<cv::Point2f> voCorners;  /**< TODO: describe */
+    std::vector<cv::Point2f> voIDPoints; /**< TODO: describe */
 };
 
 /**
@@ -63,3 +64,5 @@ inline Landmark convert2Landmark(ImgLandmark& lm_in) {
 };
 
 } // namespace stargazer
+
+#endif

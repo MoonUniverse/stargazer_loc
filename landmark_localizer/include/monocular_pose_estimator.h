@@ -36,6 +36,8 @@
 
 #include "pose_estimator.h"
 
+#include <tf/transform_broadcaster.h>
+
 namespace monocular_pose_estimator
 {
 
@@ -60,6 +62,8 @@ private:
 
   std::string landmark_info_topic_;
   std::string camera_info_topic_;
+
+  tf::TransformBroadcaster broadcaster;
 
 public:
 

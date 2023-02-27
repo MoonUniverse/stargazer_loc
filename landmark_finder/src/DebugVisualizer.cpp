@@ -45,11 +45,11 @@ cv::Mat DebugVisualizer::ShowPoints(const cv::Mat& img, const std::vector<cv::Po
 }
 
 cv::Mat DebugVisualizer::ShowClusters(const cv::Mat& img,
-                                      const std::vector<std::vector<cv::Point>> points) {
+                                      const std::vector<std::vector<cv::Point2f>> points) {
     cv::Mat temp = img.clone();
     prepareImg(temp);
     for (auto& group : points) {
-        cv::Point median(0, 0);
+        cv::Point2f median(0, 0);
         for (auto& point : group) {
             median += point;
             circle(temp, point, 1, cv::Scalar(73, 119, 0), 2); // FZI Green
@@ -77,7 +77,7 @@ void DebugVisualizer::DrawLandmarks(cv::Mat& img, const std::vector<ImgLandmark>
         for (auto& imgPoint : lm.voIDPoints) {
             circle(img, imgPoint, 1, cv::Scalar(73, 119, 0), 2); // FZI Green
         }
-        cv::Point median{(lm.voCorners[2].x + lm.voCorners[0].x) / 2,
+        cv::Point2f median{(lm.voCorners[2].x + lm.voCorners[0].x) / 2,
                          (lm.voCorners[2].y + lm.voCorners[0].y) / 2};
         double radius = sqrt(pow(lm.voCorners[2].x - lm.voCorners[0].x, 2) +
                              pow(lm.voCorners[2].y - lm.voCorners[0].y, 2));
@@ -85,7 +85,7 @@ void DebugVisualizer::DrawLandmarks(cv::Mat& img, const std::vector<ImgLandmark>
 
         std::string text = "ID: ";
         text += std::to_string(lm.nID);
-        cv::Point imgPoint = lm.voCorners.front();
+        cv::Point2f imgPoint = lm.voCorners.front();
         imgPoint.x += 25;
         imgPoint.y += 25;
         putText(img, text, imgPoint, 2, 0.4, cvScalar(0, 0, 0));

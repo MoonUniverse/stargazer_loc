@@ -138,6 +138,10 @@ void MPENode::landmarkCallback(const landmark_localizer::LandmarkArray::ConstPtr
         predicted_pose_.pose.covariance.elems[j + 6 * i] = cov(i, j);
       }
     }
+    broadcaster.sendTransform(tf::StampedTransform(
+    tf::Transform(tf::Quaternion(predicted_pose_.pose.pose.orientation.x, predicted_pose_.pose.pose.orientation.y, predicted_pose_.pose.pose.orientation.z, predicted_pose_.pose.pose.orientation.w),
+                  tf::Vector3(predicted_pose_.pose.pose.position.x, predicted_pose_.pose.pose.position.y, predicted_pose_.pose.pose.position.z)),
+    ros::Time::now(), "ir_camera_link", "landmark_loc_link"));
 
     // Publish the pose
     pose_pub_.publish(predicted_pose_);

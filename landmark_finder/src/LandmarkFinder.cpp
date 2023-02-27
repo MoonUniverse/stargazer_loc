@@ -82,6 +82,7 @@ int LandmarkFinder::DetectLandmarks(const cv::Mat& img, std::vector<ImgLandmark>
     /// returns a vector of clusters which themselves are vectors of points
     FindClusters(clusteredPixels_, clusteredPoints_, maxRadiusForCluster, minPointsPerLandmark, maxPointsPerLandmark);
 
+    // std::cout << "clusteredPoints_" << clusteredPoints_ << std::endl;
     /// on the clustered points, extract corners
     /// output is of type landmark, because now you can almost be certain that
     /// what you have is a landmark
@@ -114,14 +115,16 @@ void LandmarkFinder::FilterImage(const cv::Mat& img_in, cv::Mat& img_out) {
 /// FindPoints for pixel groups
 /// threshold pixels and group them
 ///--------------------------------------------------------------------------------------///
-std::vector<cv::Point> LandmarkFinder::FindPoints(cv::Mat& img_in) {
+std::vector<cv::Point2f> LandmarkFinder::FindPoints(cv::Mat& img_in) {
 
     /// thresholding for pixels: put all pixels over a threshold in vector
-    cv::Mat binary;
-    cv::threshold(img_in, binary, threshold, 255, cv::THRESH_BINARY);
+    // cv::Mat binary;
+    cv::threshold(img_in, binaryImage_, threshold, 255, cv::THRESH_BINARY);
 
-    std::vector<cv::Point> pixels;
-    cv::findNonZero(binary, pixels);
+    std::vector<cv::Point2f> pixels;
+    cv::findNonZero(binaryImage_, pixels);
+
+    // std::cout << "pixels:" << pixels.size() << endl;
 
     /// use this vector to group all pixels
     /// todo: this can be done more efficiently, e.g. region growing
@@ -130,10 +133,10 @@ std::vector<cv::Point> LandmarkFinder::FindPoints(cv::Mat& img_in) {
 
     /// compute mean of each pixel cluster and put it into output vector
     /// todo: this can be done more efficiently
-    std::vector<cv::Point> points;
+    std::vector<cv::Point2f> points;
     points.reserve(clusteredPixels.size());
     for (auto& cluster : clusteredPixels) {
-        cv::Point thisPoint = cv::Point(0, 0);
+        cv::Point2f thisPoint = cv::Point2f(0.0, 0.0);
         for (auto& pixel : cluster) { /// go thru all points in this cluster
             thisPoint += pixel;
         }
@@ -148,7 +151,7 @@ std::vector<cv::Point> LandmarkFinder::FindPoints(cv::Mat& img_in) {
 /// FindClusters groups points from input vector into groups
 ///
 ///--------------------------------------------------------------------------------------///
-void LandmarkFinder::FindClusters(const std::vector<cv::Point>& points_in, std::vector<Cluster>& clusters,
+void LandmarkFinder::FindClusters(const std::vector<cv::Point2f>& points_in, std::vector<Cluster>& clusters,
                                   const float radiusThreshold, const unsigned int minPointsThreshold,
                                   const unsigned int maxPointsThreshold) {
 
@@ -192,7 +195,7 @@ void LandmarkFinder::FindClusters(const std::vector<cv::Point>& points_in, std::
 /// FindCorners identifies the three corner points and sorts them into output vector
 /// -> find three points whos sum of length is maximum and two edges are perpendicular
 ///--------------------------------------------------------------------------------------///
-bool LandmarkFinder::FindCorners(std::vector<cv::Point>& point_list, std::vector<cv::Point>& corner_points) {
+bool LandmarkFinder::FindCorners(std::vector<cv::Point2f>& point_list, std::vector<cv::Point2f>& corner_points) {
 
     float fw1 = 0.6, fw2 = 30.0, fw3 = 3.0; // Weight factors for score function
     float fp = 1.05;                        // safety_factor_for_length_comparison
@@ -208,16 +211,16 @@ bool LandmarkFinder::FindCorners(std::vector<cv::Point>& point_list, std::vector
 
     /// Try all combinations of three points
     bool corners_found = false;
-    cv::Point *cornerOne, *cornerTwo, *cornerThree;
+    cv::Point2f *cornerOne, *cornerTwo, *cornerThree;
     for (size_t i = 0; i < point_list.size(); i++) {
-        cv::Point& firstPoint = point_list[i];
+        cv::Point2f& firstPoint = point_list[i];
         for (size_t j = i + 1; j < point_list.size(); j++) {
-            cv::Point& secondPoint = point_list[j];
-            cv::Point v12 = firstPoint - secondPoint;
+            cv::Point2f& secondPoint = point_list[j];
+            cv::Point2f v12 = firstPoint - secondPoint;
             for (size_t k = j + 1; k < point_list.size(); k++) {
-                cv::Point& thirdPoint = point_list[k];
-                cv::Point v31 = firstPoint - thirdPoint;
-                cv::Point v32 = secondPoint - thirdPoint;
+                cv::Point2f& thirdPoint = point_list[k];
+                cv::Point2f v31 = firstPoint - thirdPoint;
+                cv::Point2f v32 = secondPoint - thirdPoint;
 
                 /// Since we test every combination only once, make sure the lengths are correct:
                 // norm(v12) > norm(v31) >= (v32)
@@ -262,9 +265,9 @@ bool LandmarkFinder::FindCorners(std::vector<cv::Point>& point_list, std::vector
     }
 
     /// The three distances have to be updated for calculations in the next steps
-    cv::Point v12 = *cornerTwo - *cornerOne;
-    cv::Point v31 = *cornerOne - *cornerThree;
-    cv::Point v32 = *cornerTwo - *cornerThree;
+    cv::Point2f v12 = *cornerTwo - *cornerOne;
+    cv::Point2f v31 = *cornerOne - *cornerThree;
+    cv::Point2f v32 = *cornerTwo - *cornerThree;
 
     /// Compare the distances and get the diagonal of the landmark
     /// note the reversed order: it's 1-3-2, because the corner 3 is the one
@@ -327,14 +330,14 @@ std::vector<ImgLandmark> LandmarkFinder::FindLandmarks(const std::vector<Cluster
 bool LandmarkFinder::CalculateIdForward(ImgLandmark& landmark, std::vector<uint16_t>& valid_ids) {
     // TOD clean up this function
     /// first of all: get the three corner points
-    const cv::Point* oCornerOne = &landmark.voCorners.at(0);
-    const cv::Point* oCornerTwo = &landmark.voCorners.at(1);
-    const cv::Point* oCornerThree = &landmark.voCorners.at(2);
+    const cv::Point2f* oCornerOne = &landmark.voCorners.at(0);
+    const cv::Point2f* oCornerTwo = &landmark.voCorners.at(1);
+    const cv::Point2f* oCornerThree = &landmark.voCorners.at(2);
 
     // TODO move these checks into FindCorners function
     /// second: get the x- and y-axis of the landmark
-    cv::Point oTwoOne = *oCornerOne - *oCornerTwo;
-    cv::Point oTwoThree = *oCornerThree - *oCornerTwo;
+    cv::Point2f oTwoOne = *oCornerOne - *oCornerTwo;
+    cv::Point2f oTwoThree = *oCornerThree - *oCornerTwo;
 
     /// third: make sure, they are in the right order.
     /// we do this by checking if the cross product is positive
@@ -441,12 +444,12 @@ bool LandmarkFinder::CalculateIdBackward(ImgLandmark& landmark, std::vector<uint
 
     /// same as before: finde affine transformation, but this time from landmark
     /// coordinates to image coordinates
-    const cv::Point* oCornerOne = &landmark.voCorners.at(0);
-    const cv::Point* oCornerTwo = &landmark.voCorners.at(1);
-    const cv::Point* oCornerThree = &landmark.voCorners.at(2);
+    const cv::Point2f* oCornerOne = &landmark.voCorners.at(0);
+    const cv::Point2f* oCornerTwo = &landmark.voCorners.at(1);
+    const cv::Point2f* oCornerThree = &landmark.voCorners.at(2);
 
-    cv::Point oTwoOne = *oCornerOne - *oCornerTwo;
-    cv::Point oTwoThree = *oCornerThree - *oCornerTwo;
+    cv::Point2f oTwoOne = *oCornerOne - *oCornerTwo;
+    cv::Point2f oTwoThree = *oCornerThree - *oCornerTwo;
 
     /// make it a right hand system
     if (0 > oTwoOne.cross(oTwoThree)) {
@@ -573,7 +576,7 @@ int LandmarkFinder::GetIDs(std::vector<ImgLandmark>& landmarks) {
     return 0;
 }
 
-void LandmarkFinder::parallel_vector_sort(std::vector<uint16_t>& ids, std::vector<cv::Point>& points) {
+void LandmarkFinder::parallel_vector_sort(std::vector<uint16_t>& ids, std::vector<cv::Point2f>& points) {
     size_t len = ids.size();
     size_t stepsize = len / 2; // Zu Beginn ist die Lücke über den halben Array.
     bool b = true;

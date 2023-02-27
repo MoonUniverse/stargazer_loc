@@ -78,18 +78,19 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
 
     // Invert images
-    cv::bitwise_not(landmarkFinder->grayImage_, landmarkFinder->grayImage_);
-    cv::bitwise_not(landmarkFinder->filteredImage_, landmarkFinder->filteredImage_);
-
-    // // Show images
+    // cv::bitwise_not(landmarkFinder->grayImage_, landmarkFinder->grayImage_);
+    // cv::bitwise_not(landmarkFinder->filteredImage_, landmarkFinder->filteredImage_);
+    // cv::bitwise_not(landmarkFinder->binaryImage_, landmarkFinder->binaryImage_);
+    // Show images
     // debugVisualizer_.ShowImage(landmarkFinder->grayImage_, "Gray Image");
     // debugVisualizer_.ShowImage(landmarkFinder->filteredImage_, "Filtered Image");
+    debugVisualizer_.ShowImage(landmarkFinder->binaryImage_, "Binary Image");
 
     // // Show detections
     // auto point_img = debugVisualizer_.ShowPoints(landmarkFinder->filteredImage_,
     //                                              landmarkFinder->clusteredPixels_);
-    // auto cluster_img = debugVisualizer_.ShowClusters(landmarkFinder->filteredImage_,
-    //                                                  landmarkFinder->clusteredPoints_);
+    auto cluster_img = debugVisualizer_.ShowClusters(landmarkFinder->filteredImage_,
+                                                     landmarkFinder->clusteredPoints_);
 
     // Show landmarks
     cv::Mat temp;
@@ -131,9 +132,11 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       landmark_point.y = minId_landmarks.voIDPoints[i].y;
       landmark_point_array.push_back(landmark_point);
     }
+    // std::cout << "landmark_point_array:" << landmark_point_array << std::endl;
     std::vector<stargazer::Point> world_point_array;
     std::vector<cv::Point3d> world_point;
     world_point_array = stargazer::getLandmarkPoints(minId_landmarks.nID);
+
     for (int i = 0; i < world_point_array.size(); i++) {
       cv::Point3d temp_point;
       temp_point.x = world_point_array[i][0];
@@ -141,6 +144,7 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
       temp_point.z = 0;
       world_point.push_back(temp_point);
     }
+    // std::cout << "world_point" << world_point << std::endl;
     cv::Mat raux, taux;
     cv::Mat Rvec;
     cv::Mat_<float> Tvec;

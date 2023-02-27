@@ -1,8 +1,8 @@
 <launch>
 
     <arg name="stargazer_config" default="$(find landmark_finder)/res/stargazer.yaml"/>
-    <arg name="undistorted_image_topic" default="/stellar/ir/image_raw"/>
-    <arg name="camera_info_topic" default="/stellar/ir/camera_info"/>
+    <arg name="undistorted_image_topic" default="/aurora/ir/image_raw"/>
+    <arg name="camera_info_topic" default="/aurora/ir/camera_info"/>
     <arg name="landmark_topic" default="/landmarks_seen"/>
     <arg name="debug_mode" default="true"/>
 
@@ -16,7 +16,7 @@
         <param name="tight_filter_size" value="3"/>
         <param name="wide_filter_size" value="31"/>
         <param name="maxRadiusForPixelCluster" value="3"/>
-        <param name="minPixelForCluster" value="1"/>
+        <param name="minPixelForCluster" value="2"/>
         <param name="maxPixelForCluster" value="1000"/>
         <param name="maxRadiusForCluster" value="40"/>
         <param name="minPointsPerLandmark" value="5"/>
