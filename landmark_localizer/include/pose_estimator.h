@@ -75,7 +75,7 @@ private:
   double valid_correspondence_threshold_; //!< Stores the ratio of how many correspondences must be considered to be correct for the total correspondences to be considered correct. \see checkCorrespondences, initialise
   unsigned histogram_threshold_; //!< Stores the minimum numbers of entries in the initialisation histogram before an entry could be used to determine a correspondence between the LEDs and the image detections. \see correspondencesFromHistogram
 
-  std::vector<cv::Point2f> distorted_detection_centers_;
+  std::vector<cv::Point> distorted_detection_centers_;
 
   unsigned it_since_initialized_; //!< Counter to determine whether the system has been initialised already
   cv::Rect region_of_interest_; //!< OpenCV rectangle that defines the region of interest to be processd to find the LEDs in the image

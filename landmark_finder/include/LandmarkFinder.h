@@ -29,9 +29,18 @@
 #include "iostream"
 #include "math.h"
 #include "vector"
+#include <map>
+
 
 namespace stargazer {
 
+struct PointCmp {
+    bool operator() (const cv::Point& lhs, const cv::Point& rhs) const {
+        if (lhs.x < rhs.x) return true;
+        else if (lhs.x > rhs.x) return false;
+        else return lhs.y < rhs.y;
+    }
+};
 /**
  * @brief This class detects landmarks in images.
  *
@@ -63,7 +72,7 @@ public:
     cv::Mat grayImage_;                      /**< Keeps a copy of the grayvalue image */
     cv::Mat filteredImage_;                  /**< Keeps a copy of the filtered image */
     cv::Mat binaryImage_;                    /**< Keeps a copy of the binary image */
-    std::vector<cv::Point2f> clusteredPixels_; /**< Keeps a copy of pixel clusters found */
+    std::vector<cv::Point> clusteredPixels_; /**< Keeps a copy of pixel clusters found */
     std::vector<Cluster> clusteredPoints_;   /**< Keeps a copy of point clusters found*/
 
     uint8_t threshold; /**< Threshold for grayvalue thresholding 0-254*/
@@ -76,7 +85,7 @@ public:
     uint16_t minPointsPerLandmark;    /**< Minimum count of marker points per landmark (0)*/
     uint16_t maxPointsPerLandmark;    /**< Maximum count of marker points per landmark (depends on grid used)*/
     std::vector<uint16_t> valid_ids_; /**< Vector of valid IDs, read from map*/
-
+    std::map<cv::Point, Cluster, PointCmp> clusteredPoints_map;
 private:
     /**
      * @brief Applies a difference of gaussian matched filter to the image
@@ -91,7 +100,7 @@ private:
      * @param img_in
      * @return std::vector<cv::Point>
      */
-    std::vector<cv::Point2f> FindPoints(cv::Mat& img_in);
+    std::vector<cv::Point> FindPoints(cv::Mat& img_in);
     /**
      * @brief Finds hypotheses for landmarks by clustering the input points
      *
@@ -101,7 +110,7 @@ private:
      * @param minPointsThreshold
      * @param maxPointsThreshold
      */
-    void FindClusters(const std::vector<cv::Point2f>& points_in, std::vector<Cluster>& clusters,
+    void FindClusters(const std::vector<cv::Point>& points_in, std::vector<Cluster>& clusters,
                       const float radiusThreshold, const unsigned int minPointsThreshold,
                       const unsigned int maxPointsThreshold);
     /**
@@ -112,7 +121,7 @@ private:
      * @param corner_points output list (holds the found corner points)
      * @return bool indicates success
      */
-    bool FindCorners(std::vector<cv::Point2f>& point_list, std::vector<cv::Point2f>& corner_points);
+    bool FindCorners(std::vector<cv::Point>& point_list, std::vector<cv::Point>& corner_points);
     /**
      * @brief Finds valid landmark observations from the input hypotheses
      *
@@ -153,7 +162,7 @@ private:
      * @param ids
      * @param points
      */
-    void parallel_vector_sort(std::vector<uint16_t>& ids, std::vector<cv::Point2f>& points);
+    void parallel_vector_sort(std::vector<uint16_t>& ids, std::vector<cv::Point>& points);
 };
 
 } // namespace stargazer

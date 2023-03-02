@@ -39,7 +39,7 @@ void Visualization::projectOrientationVectorsOnImage(cv::Mat &image, const std::
                                                      const std::vector<double> camera_distortion_coeffs)
 {
 
-  std::vector<cv::Point2f> projected_points;
+  std::vector<cv::Point> projected_points;
 
   // 0 rotation
   cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64F);
@@ -58,7 +58,7 @@ void Visualization::projectOrientationVectorsOnImage(cv::Mat &image, const std::
 void Visualization::createVisualizationImage(cv::Mat &image, Eigen::Matrix4d transform, const cv::Mat camera_matrix_K,
                                              const std::vector<double> camera_distortion_coeffs,
                                              cv::Rect region_of_interest,
-                                             std::vector<cv::Point2f> distorted_detection_centers)
+                                             std::vector<cv::Point> distorted_detection_centers)
 {
   const double orientation_vector_length = 0.075; //!< Length of the orientation trivectors that will be projected onto the output image
 

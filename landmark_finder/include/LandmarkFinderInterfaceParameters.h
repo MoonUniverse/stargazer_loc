@@ -16,6 +16,7 @@ struct LandmarkFinderInterfaceParameters {
     std::string stargazer_config;
     std::string landmark_topic;
     std::string undistorted_image_topic;
+    std::string depth_image_topic;
     std::string camera_info_topic;
 
     Config cfg;

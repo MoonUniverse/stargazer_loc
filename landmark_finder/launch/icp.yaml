@@ -1,0 +1,41 @@
+readingDataPointsFilters:
+  - RandomSamplingDataPointsFilter:
+      prob: 1.0
+      randomSamplingMethod: 0
+
+referenceDataPointsFilters:
+  - RandomSamplingDataPointsFilter:
+      prob: 1.0
+      randomSamplingMethod: 0
+
+matcher:
+  KDTreeMatcher:
+    knn: 1
+    searchType: 0
+
+outlierFilters:
+  - TrimmedDistOutlierFilter:
+      ratio: 1.0
+
+errorMinimizer:
+  PointToPointWithCovErrorMinimizer
+
+transformationCheckers:
+  - CounterTransformationChecker:
+      maxIterationCount: 100
+  - DifferentialTransformationChecker:
+      minDiffRotErr: 0.0001
+      minDiffTransErr: 0.0001
+      smoothLength: 4   
+
+inspector:
+  NullInspector
+
+
+logger:
+  #  NullLogger
+  FileLogger
+
+  
+  
+

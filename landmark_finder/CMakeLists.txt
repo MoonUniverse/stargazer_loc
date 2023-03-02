@@ -22,12 +22,15 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   image_transport
+  libpointmatcher_ros
 )
 find_package(catkin REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(PCL REQUIRED)
+find_package(libpointmatcher REQUIRED)
 
 add_message_files(
     DIRECTORY msg
@@ -68,6 +71,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${CERES_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${libpointmatcher_INCLUDE_DIRS} 
+  ${PCL_INCLUDE_DIRS}
 )
 
 add_library(LandmarkFinder           src/LandmarkFinder.cpp)
@@ -80,7 +85,7 @@ add_library(LandmarkFinderInterfaceParameters           src/LandmarkFinderInterf
 target_link_libraries(LandmarkFinderInterfaceParameters        ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 
 add_library(LandmarkFinderInterface           src/LandmarkFinderInterface.cpp)
-target_link_libraries(LandmarkFinderInterface        ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES} LandmarkFinderInterfaceParameters LandmarkFinder DebugVisualizer)
+target_link_libraries(LandmarkFinderInterface        ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES}  ${PCL_INCLUDE_DIRS} ${libpointmatcher_INCLUDE_DIRS} LandmarkFinderInterfaceParameters LandmarkFinder DebugVisualizer)
 
 # Declare a C++ executable
 add_executable(landmark_finder_node     src/landmark_finder_node.cpp)

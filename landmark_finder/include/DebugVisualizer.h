@@ -90,7 +90,7 @@ public:
      * @param points    Clusters to be drawn
      * @return cv::Mat A copy of the input image with the drawn points
      */
-    cv::Mat ShowClusters(const cv::Mat& img, const std::vector<std::vector<cv::Point2f>> points);
+    cv::Mat ShowClusters(const cv::Mat& img, const std::vector<std::vector<cv::Point>> points);
     /**
      * @brief Draws the observed image landmarks into the input image
      *
