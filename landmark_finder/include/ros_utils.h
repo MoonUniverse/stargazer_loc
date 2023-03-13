@@ -1,3 +1,5 @@
+#ifndef ROS_UTILS_H_
+#define ROS_UTILS_H_
 #include <ros/ros.h>
 
 namespace stargazer_ros_tool {
@@ -38,3 +40,4 @@ inline void getParam(const ros::NodeHandle& node_handle, const std::string key, 
 }
 
 } // namespace stargazer_ros_tool
+#endif

@@ -16,7 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
+#ifndef STARGAZERTYPES_H_
+#define STARGAZERTYPES_H_
 
 #include <cmath>
 #include <map>
@@ -176,3 +177,6 @@ inline std::vector<Point> getLandmarkPoints(int ID) {
 typedef std::map<int, Landmark> landmark_map_t;
 
 } // namespace stargazer
+
+
+#endif

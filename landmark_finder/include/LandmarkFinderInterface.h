@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LANDMARKFINDERINTERFACE_H_
+#define LANDMARKFINDERINTERFACE_H_
 
 #include <cv_bridge/cv_bridge.h>
 #include <dynamic_reconfigure/server.h>
@@ -68,3 +69,5 @@ private:
     std::string icp_file_;
 };
 }
+
+#endif

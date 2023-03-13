@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LANDMARKFINDERINTERFACEPARAMETERS_H_
+#define LANDMARKFINDERINTERFACEPARAMETERS_H_
 
 #include <string>
 #include <ros/node_handle.h>
@@ -22,3 +23,4 @@ struct LandmarkFinderInterfaceParameters {
     Config cfg;
 };
 }
+#endif

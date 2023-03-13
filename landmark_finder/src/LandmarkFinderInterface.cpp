@@ -201,7 +201,7 @@ void LandmarkFinderInterface::imgCallback(const sensor_msgs::ImageConstPtr& msg)
 #endif
 
 // icp
-#if 1
+#if 0
     std::vector<cv::Point> landmark_point_in_camera;
     cv::Point landmark_point;
 

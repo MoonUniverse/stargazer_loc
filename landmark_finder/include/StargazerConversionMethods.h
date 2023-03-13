@@ -2,7 +2,9 @@
 // Created by bandera on 10.06.16.
 //
 
-#pragma once
+#ifndef STARGAZERCONVERSIONMETHODS_H_
+#define STARGAZERCONVERSIONMETHODS_H_
+
 #include <ceres/rotation.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -165,3 +167,5 @@ inline stargazer::pose_t gmPose2pose(const geometry_msgs::Pose& pose_in) {
 }
 
 } // namespace stargazer_ros_tool
+
+#endif
